@@ -7,6 +7,7 @@ class Snake:
         self.body.insert(0, next_cell)
 
     def shrink(self):
+        """ shrink the head of the snake """
         self.body.pop()
 
     def head(self):
