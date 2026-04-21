@@ -5,6 +5,7 @@ from snake import Snake
 from food import spawn_food
 from ai import astar
 from ui import draw_cell, draw_menu, draw_game_over
+from  problem_formulation import SnakeProblem
 
 pygame.init()
 
@@ -50,14 +51,15 @@ while True:
                 pygame.quit()
                 sys.exit()
 
-        if event.key == pygame.K_UP and snake.direction != (0, 1):
-            snake.direction = (0, -1)
-        elif event.key == pygame.K_DOWN and snake.direction != (0, -1):
-            snake.direction = (0, 1)
-        elif event.key == pygame.K_LEFT and snake.direction != (1, 0):
-            snake.direction = (-1, 0)
-        elif event.key == pygame.K_RIGHT and snake.direction != (-1, 0):
-            snake.direction = (1, 0)
+        if mode == "MANUAL" and event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_UP:
+                snake.direction = (0, -1)
+            elif event.key == pygame.K_DOWN:
+                snake.direction = (0, 1)
+            elif event.key == pygame.K_LEFT:
+                snake.direction = (-1, 0)
+            elif event.key == pygame.K_RIGHT:
+                snake.direction = (1, 0)
 
     if mode is None:
         draw_menu(screen, font, ai_button, manual_button)
@@ -72,7 +74,10 @@ while True:
         continue
 
     if mode == "AI":
+        problem = SnakeProblem(snake, food, config.GRID_SIZE)
+
         path = astar(snake.head(), food, snake.body)
+
         next_cell = path[0] if path else snake.head()
     else:
         next_cell = (snake.head()[0] + snake.direction[0],
