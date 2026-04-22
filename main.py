@@ -5,7 +5,7 @@ from snake import Snake
 from food import spawn_food
 from ai import astar
 from ui import draw_cell, draw_menu, draw_game_over
-from  problem_formulation import SnakeProblem
+from problem_formulation import SnakeProblem
 
 pygame.init()
 
@@ -75,10 +75,28 @@ while True:
 
     if mode == "AI":
         problem = SnakeProblem(snake, food, config.GRID_SIZE)
+        path = astar(problem)
 
-        path = astar(snake.head(), food, snake.body)
+        if path:
+            next_cell = path[0]
+        else:
 
-        next_cell = path[0] if path else snake.head()
+            possible_moves = [
+                (snake.head()[0] + 1, snake.head()[1]),
+                (snake.head()[0] - 1, snake.head()[1]),
+                (snake.head()[0], snake.head()[1] + 1),
+                (snake.head()[0], snake.head()[1] - 1)
+            ]
+
+            safe_moves = []
+            for move in possible_moves:
+                if (0 <= move[0] < config.GRID_SIZE and
+                    0 <= move[1] < config.GRID_SIZE and
+                    move not in snake.body):
+                    safe_moves.append(move)
+
+            next_cell = safe_moves[0] if safe_moves else snake.head()
+
     else:
         next_cell = (snake.head()[0] + snake.direction[0],
                      snake.head()[1] + snake.direction[1])
@@ -118,4 +136,4 @@ while True:
                 (10, 10))
 
     pygame.display.flip()
-    clock.tick(12)
+    clock.tick(12 if mode == "AI" else 8)
