@@ -6,6 +6,7 @@ from food import spawn_food
 from ai import astar
 from ui import draw_cell, draw_menu, draw_game_over
 from problem_formulation import SnakeProblem
+from obstacles import  spawn_obstacles
 
 pygame.init()
 
@@ -18,16 +19,19 @@ ai_button = pygame.Rect(config.WIDTH//2 - 120, config.HEIGHT//2 - 60, 240, 50)
 manual_button = pygame.Rect(config.WIDTH//2 - 120, config.HEIGHT//2 + 20, 240, 50)
 
 snake = Snake()
-food = spawn_food(snake.body)
+obstacles = spawn_obstacles(snake.body, None)
+food = spawn_food(snake.body,obstacles)
+obstacles = spawn_obstacles(snake.body,food)
 score = 0
 
 mode = None
 game_over = False
 
 def reset_game():
-    global snake, food, score, mode, game_over
+    global snake, food, score, mode, game_over,obstacles
     snake = Snake()
-    food = spawn_food(snake.body)
+    food = spawn_food(snake.body,obstacles)
+    obstacles = spawn_obstacles(snake.body,food)
     score = 0
     mode = None
     game_over = False
@@ -74,7 +78,7 @@ while True:
         continue
 
     if mode == "AI":
-        problem = SnakeProblem(snake, food, config.GRID_SIZE)
+        problem = SnakeProblem(snake, food, config.GRID_SIZE,obstacles)
         path = astar(problem)
 
         if path:
@@ -92,7 +96,10 @@ while True:
             for move in possible_moves:
                 if (0 <= move[0] < config.GRID_SIZE and
                     0 <= move[1] < config.GRID_SIZE and
-                    move not in snake.body):
+                    move not in snake.body and
+                    move not in obstacles
+                ):
+
                     safe_moves.append(move)
 
             next_cell = safe_moves[0] if safe_moves else snake.head()
@@ -105,13 +112,14 @@ while True:
 
     if snake.head() == food:
         score += 1
-        food = spawn_food(snake.body)
+        food = spawn_food(snake.body,obstacles)
     else:
         snake.shrink()
 
     if (snake.head()[0] < 0 or snake.head()[0] >= config.GRID_SIZE or
         snake.head()[1] < 0 or snake.head()[1] >= config.GRID_SIZE or
-        snake.head() in snake.body[1:]):
+        snake.head() in snake.body[1:] or
+        snake.head() in obstacles):
         game_over = True
 
     screen.fill(config.BLACK)
@@ -121,7 +129,8 @@ while True:
             pygame.draw.rect(screen, (25, 25, 25),
                              (x * config.CELL_SIZE, y * config.CELL_SIZE,
                               config.CELL_SIZE, config.CELL_SIZE), 1)
-
+    for (x, y) in obstacles:
+        draw_cell(screen, x, y, config.BLUE)
     for i, (x, y) in enumerate(snake.body):
         color = config.GREEN if i == 0 else config.DARK_GREEN
         draw_cell(screen, x, y, color)
@@ -136,4 +145,4 @@ while True:
                 (10, 10))
 
     pygame.display.flip()
-    clock.tick(12 if mode == "AI" else 8)
+    clock.tick(10)

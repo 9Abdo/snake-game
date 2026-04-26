@@ -7,6 +7,7 @@ def astar(problem):
     start = problem.snake.head()
     goal = problem.food
     snake_body = problem.snake.body
+    obstacles=problem.obstacles
 
     open_set = []
     heapq.heappush(open_set, (0, start))
@@ -30,9 +31,7 @@ def astar(problem):
 
             body = snake_body[:-1]
 
-            if (0 <= neighbor[0] < problem.grid_size and
-                0 <= neighbor[1] < problem.grid_size and
-                neighbor not in body):
+            if problem.is_valid(neighbor, body):
 
                 temp_g = g_score[current] + problem.step_cost()
 

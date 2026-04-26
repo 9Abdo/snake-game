@@ -1,18 +1,38 @@
 class SnakeProblem:
-    def __init__(self, snake, food, grid_size):
+    UP = (0, -1)
+    DOWN = (0, 1)
+    LEFT = (-1, 0)
+    RIGHT = (1, 0)
+
+    def __init__(self, snake, food, grid_size, obstacles):
         self.snake = snake
         self.food = food
         self.grid_size = grid_size
-
+        self.obstacles = obstacles
     def is_goal(self):
         return self.snake.head() == self.food
 
     def get_actions(self):
-        return [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        return [self.UP, self.DOWN, self.LEFT, self.RIGHT]
 
     def result(self, action):
-        head = self.snake.head()
-        return (head[0] + action[0], head[1] + action[1])
+        x, y = self.snake.head()
+        dx, dy = action
+        return x + dx, y + dy
 
+    # 💰 Step cost
     def step_cost(self):
         return 1
+
+    def is_valid(self, cell, body):
+        x, y = cell
+        if x < 0 or x >= self.grid_size or y < 0 or y >= self.grid_size:
+            return False
+
+        if cell in self.obstacles:
+            return False
+
+        if cell in set(body):
+            return False
+
+        return True
