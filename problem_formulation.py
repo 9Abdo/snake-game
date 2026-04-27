@@ -9,18 +9,18 @@ class SnakeProblem:
         self.food = food
         self.grid_size = grid_size
         self.obstacles = obstacles
+
     def is_goal(self):
         return self.snake.head() == self.food
 
     def get_actions(self):
         return [self.UP, self.DOWN, self.LEFT, self.RIGHT]
 
-    def result(self, action):
-        x, y = self.snake.head()
+    def result(self, state, action):
+        x, y = state
         dx, dy = action
         return x + dx, y + dy
 
-    # 💰 Step cost
     def step_cost(self):
         return 1
 
@@ -32,7 +32,9 @@ class SnakeProblem:
         if cell in self.obstacles:
             return False
 
-        if cell in set(body):
+        if cell in body[:-1]:
             return False
 
         return True
+    def heuristic(self, cell):
+        return abs(cell[0] - self.food[0]) + abs(cell[1] - self.food[1])
